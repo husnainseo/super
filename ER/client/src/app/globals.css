@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+      --font-poppins:"Poppins";
+      color: #1f1f29;
+    }
+  }
+  
+  @keyframes shake {
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translate(-2px);
+    }
+    40% {
+      transform: translate(2px);
+    }
+    60% {
+      transform: translate(-2px);
+    }
+    80% {
+      transform: translate(2px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+  
+  .shake {
+    animation: shake 0.5s ease-in-out;
+  }
+  
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input [type="number"] {
+    -moz-appearance: textfield;
+  }
+  
+  @keyframes bounce-diagonal {
+    0% {
+      top: 0;
+      left: 0;
+      transform: translate(0, 0);
+    }
+    25% { /* First segment - top-left to top-center */
+      top: 0;
+      left: calc(50% - 5px); /* Adjust for ball size and path */
+      transform: translate(-25%, 0);
+    }
+    50% { /* Second segment - top-center to top-right */
+      top: calc(25% - 5px); /* Adjust for ball size and path */
+      left: 100%;
+      transform: translate(-50%, -25%);
+    }
+     75% {
+        top: calc(100vh - 20px); /* Adjust for ball and screen height */
+        left: calc(50% + 5px);
+        transform: translate(-25%, 50%);
+      }
+      100% {
+        top: calc(75vh - 15px); /* Adjust for ball and screen height */
+        left: 0;
+        transform: translate(0%, 25%);
+      }
+    }
+  
+  
+  .animate-bounce-diagonal {
+    animation-name: bounce-diagonal;
+    animation-duration: 30s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background:none
+  }
+   
+  ::-webkit-scrollbar-thumb {
+    background: #888; 
+    border-radius: 20px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+  }
+  
+  .noSelect {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
