@@ -34,7 +34,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://3000-husnainseo-super-7kshv9vjans.ws-us110.gitpod.io",
     credentials: true,
   })
 );

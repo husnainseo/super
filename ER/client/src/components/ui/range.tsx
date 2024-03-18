@@ -28,19 +28,31 @@ type Props = {
   title: string;
   component?: ReactNode;
   unit?: string;
+  value: number[];
+  setValue: React.Dispatch<React.SetStateAction<number[]>>
+  rangeIdx:number[];
+  setRangeIdx : React.Dispatch<React.SetStateAction<number[]>>
+  max?:number;
+  setMax?:(e:number)=>void;
 };
 
 const PricevalueSlider: React.FC<Props> = ({
   area,
+  rangeIdx,
+  setRangeIdx,
   title,
   component,
   unit,
+  value,
+  setValue,
+  max,
+  setMax
 }) => {
-  const [max, setMax] = useState(0);
-  const [value, setValue] = useState([0, 0]);
+  
+
 
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
-    if (Array.isArray(newValue)) {
+    if (Array.isArray(newValue) && max) {
       if (newValue[1] > max) {
         setValue([value[0], 0]);
       } else {
@@ -114,39 +126,14 @@ const PricevalueSlider: React.FC<Props> = ({
         updatedValueReverse = 0;
       }
       setValue([updatedValue, updatedValueReverse]);
+      setRangeIdx([newValue[0],newValue[1]])
     }
     if (Array.isArray(newValue) && area) {
       setValue([newValue[0], newValue[1]]);
     }
   };
 
-  useEffect(() => {
-    if (unit) {
-      let initialvalue: number = 0;
-
-      switch (unit) {
-        case "Marla":
-          initialvalue = 50;
-          break;
-        case "Sq.Ft":
-          initialvalue = 11250;
-          break;
-        case "Sq.M":
-          initialvalue = 51000;
-          break;
-        case "Sq.Yd":
-          initialvalue = 4000;
-          break;
-        case "Kanal":
-          initialvalue = 100;
-          break;
-        default:
-          break;
-      }
-      setMax(initialvalue);
-      setValue([0, initialvalue]);
-    }
-  }, [unit]);
+    
 
   return (
     <div className="px-3 py-2 w-80 flex flex-col gap-2">
@@ -157,51 +144,47 @@ const PricevalueSlider: React.FC<Props> = ({
       </div>
       {area && (
         <div className="flex justify-between items-center mt-2">
-        <input
-          type="text"
-          className={`w-28 px-2 border rounded  h-8 outline-none ${
-            value[0] === 0 && "text-zinc-400"
-          }`}
-          value={value[0]}
-          onChange={handleInputChangefirst}
-          onBlur={handleBlurone}
-        />
-        <p>To</p>
-        <input
-          type="text"
-          className={`w-28 px-2 border rounded  h-8 outline-none ${
-            value[1] === 0 && "text-zinc-400"
-          }`}
-          value={value[1] === 0 ? "Any" : value[1]}
-          onChange={handleInputChangeSecond}
-          onBlur={handleBlurtwo}
-        />
-      </div>
+          <input
+            type="text"
+            className={`w-28 px-2 border rounded  h-8 outline-none ${value[0] === 0 && "text-zinc-400"
+              }`}
+            value={value[0]}
+            onChange={handleInputChangefirst}
+            onBlur={handleBlurone}
+          />
+          <p>To</p>
+          <input
+            type="text"
+            className={`w-28 px-2 border rounded  h-8 outline-none ${value[1] === 0 && "text-zinc-400"
+              }`}
+            value={value[1] === 0 ? "Any" : value[1]}
+            onChange={handleInputChangeSecond}
+            onBlur={handleBlurtwo}
+          />
+        </div>
       )}
       {!area && (
         <div className="flex justify-between items-center mt-2">
-        <input
-        disabled
-          type="text"
-          className={`w-28 px-2 border rounded  h-8 outline-none ${
-            value[0] === 0 && "text-zinc-400"
-          }`}
-          value={value[0]}
-          onChange={handleInputChangefirst}
-          onBlur={handleBlurone}
-        />
-        <p>To</p>
-        <input
-        disabled
-          type="text"
-          className={`w-28 px-2 border rounded  h-8 outline-none ${
-            value[1] === 0 && "text-zinc-400"
-          }`}
-          value={value[1] === 0 ? "Any" : value[1]}
-          onChange={handleInputChangeSecond}
-          onBlur={handleBlurtwo}
-        />
-      </div>
+          <input
+            disabled
+            type="text"
+            className={`w-28 px-2 border rounded  h-8 outline-none ${value[0] === 0 && "text-zinc-400"
+              }`}
+            value={value[0]}
+            onChange={handleInputChangefirst}
+            onBlur={handleBlurone}
+          />
+          <p>To</p>
+          <input
+            disabled
+            type="text"
+            className={`w-28 px-2 border rounded  h-8 outline-none ${value[1] === 0 && "text-zinc-400"
+              }`}
+            value={value[1] === 0 ? "Any" : value[1]}
+            onChange={handleInputChangeSecond}
+            onBlur={handleBlurtwo}
+          />
+        </div>
       )}
       {!area && (
         <div className="flex justify-between items-center">
@@ -217,22 +200,22 @@ const PricevalueSlider: React.FC<Props> = ({
 
       <div className="my-4 ">
         {area && (
-           <EmarkSlider
-           value={value}
-           min={0}
-           max={max}
-           onChange={handleSliderChange}
-         />
+          <EmarkSlider
+            value={value}
+            min={0}
+            max={max}
+            onChange={handleSliderChange}
+          />
         )}
         {!area && (
-           <EmarkSlider
-           defaultValue={[0, 67]}
-           min={0}
-           max={67}
-           onChange={handleChange}
-         />
+          <EmarkSlider
+            defaultValue={[rangeIdx[0], rangeIdx[1]]}
+            min={0}
+            max={67}
+            onChange={handleChange}
+          />
         )}
-       
+
       </div>
     </div>
   );

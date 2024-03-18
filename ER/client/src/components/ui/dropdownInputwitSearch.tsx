@@ -78,7 +78,7 @@ const Dropdown: FC<Props> = ({
         <input
           type="text"
           value={searchTerm === "" ? label : searchTerm}
-          className={`outline-none w-[90%]`}
+          className={`outline-none w-[90%] capitalize`}
           placeholder={placeholder}
           onClick={handleShow}
           onChange={(e) => {

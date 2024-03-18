@@ -92,5 +92,20 @@ export interface IUser {
   listings: IListing[];
 }
 
+export interface IFilter {
+  city: string;
+  purpose: string;
+  propertyType: string;
+  subPropertyType: string[];
+  minPrice: number;
+  maxPrice: number;
+  measureType: string;
+  minSize: number;
+  maxSize: number;
+  bed: string[];
+  bathroom: string[];
+  features: string[];
+  sort:string
+}
 
 

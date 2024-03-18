@@ -18,6 +18,7 @@ interface Props {
   handleAllTags: (btnType: string, btnValue: string) => void;
   filter?:boolean;
   handleReset:()=>void;
+  handleConfirm?:()=>void;
 }
 
 const Amenities: React.FC<Props> = ({
@@ -26,7 +27,8 @@ const Amenities: React.FC<Props> = ({
   removeTags,
   handleAllTags,
   filter,
-  handleReset
+  handleReset,
+  handleConfirm
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<TFeatureType[]>([]);
@@ -82,7 +84,7 @@ const Amenities: React.FC<Props> = ({
         </Suspense>
       </section>
       <div className="flex gap-2 justify-start mt-2">
-        <button onClick={toggleAlert} className={styles.BlackButton}>
+        <button onClick={()=>{toggleAlert();handleConfirm && handleConfirm()}} className={styles.BlackButton}>
           Confirm
         </button>
         <button onClick={handleReset} className="border px-4 py-2 rounded-md font-medium">Reset All</button>

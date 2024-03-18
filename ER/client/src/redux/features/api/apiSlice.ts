@@ -6,7 +6,7 @@ require("dotenv").config();
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1",
+    baseUrl: "https://8000-husnainseo-super-7kshv9vjans.ws-us110.gitpod.io/api/v1",
   }),
   endpoints: (builder) => ({
     loadUser: builder.query({

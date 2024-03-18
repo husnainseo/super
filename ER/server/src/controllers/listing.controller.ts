@@ -74,6 +74,16 @@ export const uploadListing = catchAsyncErrors(
 
 
       await redis.set(userId, JSON.stringify(user));
+
+      const existingListingsJSON = await redis.get("allListings");
+      let existingListings = existingListingsJSON ? JSON.parse(existingListingsJSON) : [];
+
+      existingListings.push(listing);
+
+      const updatedListingsJSON = JSON.stringify(existingListings);
+
+      await redis.set("allListings", updatedListingsJSON);
+
       res.status(200).json({
         message: "Listing created successfully",
         success: true,
@@ -96,10 +106,10 @@ export const editListing = catchAsyncErrors(
         return next(new ErrorHandler("Listing not found", 404));
       }
       const removedImages = existingListing.images.filter((image) => {
-        return !data.images.some((newImage:any) => newImage.public_id === image.public_id);
+        return !data.images.some((newImage: any) => newImage.public_id === image.public_id);
       }
       );
-      console.log("removed",removedImages)
+      console.log("removed", removedImages)
       await Promise.all(
         removedImages.map(async (image) => {
           await cloudinary.v2.uploader.destroy(image.public_id);
@@ -217,10 +227,10 @@ export const getSingleListing = catchAsyncErrors(
       //     listing,
       //   });
       // } else {
-        const listing = await Listing.findById(listingId)
+      const listing = await Listing.findById(listingId)
         .populate({
-            path: 'postedBy',
-            populate: { path: 'profile' }
+          path: 'postedBy',
+          populate: { path: 'profile' }
         })
         .lean();
 

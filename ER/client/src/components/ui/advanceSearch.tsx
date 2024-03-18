@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 const SearchBox = dynamic(() => import("./dropdownInputwitSearch"));
 const CardsPagination = dynamic(() => import("./CardsPagination"));
-import { cityOptions } from "../../data/propertyFormData";
+import { cityOptions, propertyType, subTypeCommercial } from "../../data/propertyFormData";
 import { IListing } from "@/types/types";
 import { ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -11,8 +11,10 @@ import Alert from "../ui/Modal";
 import Amenities from "../Dashboard/amenities";
 import DropDownwithValue from "./dropdownwithValue";
 import DropDownwithApply from "./dropdownwithApply";
-import MultiBtns from "./multipleBtns";
-import Range from "./range";
+import { IFilter } from "@/types/types";
+import Pricing from "./pricing";
+
+
 
 type Props = {
   path: string;
@@ -20,20 +22,6 @@ type Props = {
   listing: IListing[];
 };
 
-interface IFilter {
-  city: string;
-  purpose: string;
-  propertyType: string;
-  subPropertyType: string[];
-  minPrice: number;
-  maxPrice: number;
-  measureType: string;
-  minSize: number;
-  maxSize: number;
-  bed: string[];
-  bathroom: string[];
-  features: string[];
-}
 
 const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
   const pathSegements = path.split("/")[2].split("-");
@@ -49,7 +37,7 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
     minSize: searchParams?.get("minSize"),
     maxSize: searchParams?.get("maxSize"),
     bed: searchParams?.getAll("bed"),
-    bath: searchParams?.getAll("bath"),
+    bath: searchParams?.getAll("bathroom"),
     features: searchParams?.getAll("features"),
   };
   const initialFilterState: IFilter = {
@@ -57,34 +45,64 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
     purpose: params.purpose,
     propertyType: params.propertyType,
     subPropertyType:
-      params.subPropertyType && params.subPropertyType[0]
-        ? JSON.parse(decodeURIComponent(params.subPropertyType[0]))
-        : ["All Properties"],
+      params.subPropertyType && params.subPropertyType.length > 0
+        ? JSON.parse(
+          decodeURIComponent(params.subPropertyType[0]).replace(/%5B/g, "[").replace(/%5D/g, "]")
+        )
+        : ["All"]
+    ,
     minPrice: params.minPrice ? parseInt(params.minPrice) : 0,
     maxPrice: params.maxPrice ? parseInt(params.maxPrice) : 0,
     measureType: params.measureType ? params.measureType : "Marla",
     minSize: params.minSize ? parseInt(params.minSize) : 0,
-    maxSize: params.maxSize ? parseInt(params.maxSize) : 0,
+    maxSize: params.maxSize ? parseInt(params.maxSize) : 50,
     bed:
-      params.bed && params.bed[0]
-        ? JSON.parse(decodeURIComponent(params.bed[0]))
-        : ["any"],
+      params.bed && params.bed.length > 0
+        ? JSON.parse(
+          decodeURIComponent(params.bed[0]).replace(/%5B/g, "[").replace(/%5D/g, "]")
+        )
+        : ["Any"],
     bathroom:
-      params.bath && params.bath[0]
-        ? JSON.parse(decodeURIComponent(params.bath[0]))
-        : ["any"],
+      params.bath && params.bath.length > 0
+        ? JSON.parse(
+          decodeURIComponent(params.bath[0]).replace(/%5B/g, "[").replace(/%5D/g, "]")
+        )
+        : ["Any"],
     features:
-      params.features && params.features[0]
-        ? JSON.parse(decodeURIComponent(params.features![0]))
+      params.features && params.features.length > 0
+        ? params.features.map(param => JSON.parse(decodeURIComponent(param)))
         : [],
+    sort: "New Listings"
   };
+
+
+
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      // Convert to Millions
+      const crore = (price / 10000000);
+      return `${crore} Crore`;
+    } else if (price >= 100000) {
+      // Convert to Lacs
+      const lacs = (price / 100000);
+      return `${lacs} Lac`;
+    } else {
+      // Default: display the price as is
+      return `${price}`;
+    }
+  };
+
   const [filters, setFilters] = useState<IFilter>(initialFilterState);
   const [isOpen, setIsOpen] = useState(false);
+  const [link, setLink] = useState("");
+  const [tempFeatures, setTempFeatures] = useState({ features: filters.features || [] });
   const toggleAlert = () => {
     setIsOpen(!isOpen);
   };
+
+
   const handleFeatures = (btnType: string) => {
-    setFilters((prevForm) => {
+    setTempFeatures((prevForm) => {
       let newFeatures = [...prevForm.features];
       if (newFeatures.includes(btnType)) {
         newFeatures = newFeatures.filter((feature) => feature !== btnType);
@@ -95,49 +113,27 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
     });
   };
 
-  const handleSubPropertyType = (btnType: string) => {
-    setFilters((prevForm) => {
-      let newSubPropertyType = [...prevForm.subPropertyType];
-      if (newSubPropertyType.includes(btnType)) {
-        newSubPropertyType = newSubPropertyType.filter(
-          (feature) => feature !== btnType
-        );
-      } else {
-        newSubPropertyType = [...newSubPropertyType, btnType];
-      }
-      return { ...prevForm, subPropertyType: newSubPropertyType };
-    });
-  };
-
-  const handleBed = (btnType: string) => {
-    setFilters((prevForm) => {
-      let newBed = [...prevForm.bed];
-      if (newBed.includes(btnType)) {
-        newBed = newBed.filter((feature) => feature !== btnType);
-      } else {
-        newBed = [btnType];
-      }
-      return { ...prevForm, bed: newBed };
-    });
-  };
-
-  const handleBath = (btnType: string) => {
-    setFilters((prevForm) => {
-      let newBath = [...prevForm.bathroom];
-      if (newBath.includes(btnType)) {
-        newBath = newBath.filter((feature) => feature !== btnType);
-      } else {
-        newBath = [btnType];
-      }
-      return { ...prevForm, bathroom: newBath };
-    });
-  };
+  let price: string
+  if (filters.minPrice > 0 && filters.maxPrice > 0) {
+    price = `PKR${<Pricing price={filters.minPrice} />}-${<Pricing price={filters.maxPrice} />}`;
+  } else if (filters.minPrice > 0 && filters.maxPrice === 0) {
+    price = `PKR ${<Pricing price={filters.minPrice} />} +`;
+  } else if (filters.maxPrice > 0 && filters.minPrice === 0) {
+    price = `PKR - UPTO ${<Pricing price={filters.maxPrice} />}`;
+  } else {
+    price = "Price";
+  }
 
   const handleReset = () => {
     setFilters((prevForm) => ({
       ...prevForm,
       features: [],
     }));
+
+    setTempFeatures((prevForm) => ({
+      ...prevForm,
+      features: []
+    }))
   };
 
   let filteredProperty = listing;
@@ -160,9 +156,11 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
   if (params.subPropertyType && params.subPropertyType.length > 0) {
     filteredProperty = filteredProperty.filter((e) => {
       const listingSubProps = e.subPropertyType;
-      return params.subPropertyType?.every((sub: string) =>
-        listingSubProps.includes(sub)
+      return filters.subPropertyType?.some((sub: string) =>
+        listingSubProps.includes(sub.toLowerCase())
+
       );
+
     });
   }
   if (params.minPrice || params.maxPrice) {
@@ -182,7 +180,7 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
   }
   if (typeof params.measureType === "string" && params.measureType !== null) {
     filteredProperty = filteredProperty.filter((e) =>
-      e.area.type.includes(params.measureType!)
+      params.measureType && e.area.type.includes(params.measureType.toLowerCase())
     );
   }
   if (params.minSize || params.maxSize) {
@@ -201,18 +199,18 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
     });
   }
   if (params.bed && params.bed.length > 0) {
-    if (filters.bed[0] !== "any") {
+    if (filters.bed[0] !== "Any") {
       filteredProperty = filteredProperty.filter((e) => {
         const listingBeds = e.bedrooms;
-        return params.bed?.every((bed) => listingBeds.includes(bed));
+        return filters.bed?.some((bed) => listingBeds.includes(bed));
       });
     }
   }
   if (params.bath && params.bath.length > 0) {
-    if (filters.bed[0] !== "any") {
+    if (filters.bathroom[0] !== "Any") {
       filteredProperty = filteredProperty.filter((e) => {
         const listingBath = e.bathrooms;
-        return params.bath?.every((bath) => listingBath.includes(bath));
+        return filters.bathroom?.some((bath) => listingBath.includes(bath));
       });
     }
   }
@@ -224,24 +222,41 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
       );
     });
   }
+  if (filters.sort === "New Listings") {
+    filteredProperty = filteredProperty.sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateB - dateA;
+    });
+  } else if (filters.sort === "Price Low to High") {
+    filteredProperty = filteredProperty.sort((a, b) => {
+      const PriceA = a.price;
+      const PriceB = b.price;
+      return PriceA - PriceB
+    })
+  } else if (filters.sort === "Price High to Low") {
+    filteredProperty = filteredProperty.sort((a, b) => {
+      const PriceA = a.price;
+      const PriceB = b.price;
+      return PriceB - PriceA
+    })
+  }
 
-  const handleSearch = () => {
+  useEffect(() => {
     const sp = new URLSearchParams(searchParams ?? "");
-    const pathSegments = path.split("/");
-    let newPath = `/${filters.purpose.toLowerCase()}/${filters.city
+    let newPath = `/${filters.purpose === "Buy" ? "sale" : filters.purpose.toLowerCase()}/${filters.city
       .toLocaleLowerCase()
       .trim()}-${filters.propertyType.trim().toLowerCase()}`;
 
     newPath += `?`;
     if (
-      !filters.subPropertyType.includes("all") &&
+      !filters.subPropertyType.includes("All") &&
       filters.subPropertyType.length > 0
     ) {
-      const encodedSubPropertyType = filters.subPropertyType
-        .map(encodeURIComponent)
-        .join(",");
+      const encodedSubPropertyType = encodeURIComponent(JSON.stringify(filters.subPropertyType));
+      sp.delete("subPropertyType")
       sp.set("subPropertyType", encodedSubPropertyType);
-    } else if (filters.subPropertyType.includes("all")) {
+    } else if (filters.subPropertyType.includes("All")) {
       sp.delete("subPropertyType");
     }
     if (filters.minPrice > 0) {
@@ -254,28 +269,71 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
     } else {
       sp.delete("maxPrice");
     }
-    if (filters.measureType && (filters.minSize > 0 || filters.maxSize > 0)) {
+    if (filters.measureType === "Marla" && (filters.minSize > 0 || filters.maxSize < 50)) {
       sp.set("sizeUnit", filters.measureType);
+      if (filters.minSize === 0) {
+        sp.delete("minSize")
+      } if (filters.maxSize === 50) {
+        sp.delete("maxSize")
+      } if (filters.minSize > 0) {
+        sp.set("minSize", filters.minSize.toString())
+      } if (filters.maxSize < 50) {
+        sp.set("maxSize", filters.maxSize.toString())
+      }
+    } else if (filters.measureType === "Sq.Ft" && (filters.minSize > 0 || filters.maxSize < 11250)) {
+      sp.set("sizeUnit", filters.measureType);
+      if (filters.minSize === 0) {
+        sp.delete("minSize")
+      } if (filters.maxSize === 11250) {
+        sp.delete("maxSize")
+      } if (filters.minSize > 0) {
+        sp.set("minSize", filters.minSize.toString())
+      } if (filters.maxSize < 11250) {
+        sp.set("maxSize", filters.maxSize.toString())
+      }
+    }
+    else if (filters.measureType === "Sq.M" && (filters.minSize > 0 || filters.maxSize < 51000)) {
+      sp.set("sizeUnit", filters.measureType);
+      if (filters.minSize === 0) {
+        sp.delete("minSize")
+      } if (filters.maxSize === 51000) {
+        sp.delete("maxSize")
+      } if (filters.minSize > 0) {
+        sp.set("minSize", filters.minSize.toString())
+      } if (filters.maxSize < 51000) {
+        sp.set("maxSize", filters.maxSize.toString())
+      }
+    }
+    else if (filters.measureType === "Sq.Yd" && (filters.minSize > 0 || filters.maxSize < 4000)) {
+      sp.set("sizeUnit", filters.measureType);
+      if (filters.minSize === 0) {
+        sp.delete("minSize")
+      } if (filters.maxSize === 4000) {
+        sp.delete("maxSize")
+      } if (filters.minSize > 0) {
+        sp.set("minSize", filters.minSize.toString())
+      } if (filters.maxSize < 4000) {
+        sp.set("maxSize", filters.maxSize.toString())
+      }
+    } else if (filters.measureType === "Kanal" && (filters.minSize > 0 || filters.maxSize < 100)) {
+      sp.set("sizeUnit", filters.measureType);
+      if (filters.minSize === 0) {
+        sp.delete("minSize")
+      } if (filters.maxSize === 100) {
+        sp.delete("maxSize")
+      } if (filters.minSize > 0) {
+        sp.set("minSize", filters.minSize.toString())
+      } if (filters.maxSize < 100) {
+        sp.set("maxSize", filters.maxSize.toString())
+      }
     } else {
       sp.delete("sizeUnit");
       sp.delete("minSize");
       sp.delete("maxSize");
     }
 
-    if (filters.minSize > 0) {
-      sp.set("minSize", filters.minSize.toString());
-    } else {
-      sp.delete("minSize");
-    }
-
-    if (filters.maxSize > 0) {
-      sp.set("maxSize", filters.maxSize.toString());
-    } else {
-      sp.delete("maxSize");
-    }
-
-    if (filters.bed && filters.bed.length > 0 && filters.bed[0] !== "any") {
-      const encodedBed = filters.bed.map(encodeURIComponent).join(",");
+    if (filters.bed && filters.bed.length > 0 && filters.bed[0] !== "Any") {
+      const encodedBed = encodeURIComponent(JSON.stringify(filters.bed))
       sp.set("bed", encodedBed);
     } else {
       sp.delete("bed");
@@ -284,23 +342,28 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
     if (
       filters.bathroom &&
       filters.bathroom.length > 0 &&
-      filters.bathroom[0] !== "any"
+      filters.bathroom[0] !== "Any"
     ) {
-      const encodedBath = filters.bathroom.map(encodeURIComponent).join(",");
+      const encodedBath = encodeURIComponent(JSON.stringify(filters.bathroom))
       sp.set("bathroom", encodedBath);
     } else {
       sp.delete("bathroom");
     }
     if (filters.features.length > 0) {
-      const encodedFeatures = filters.features
-        .map(encodeURIComponent)
-        .join(",");
+      const encodedFeatures = encodeURIComponent(JSON.stringify(filters.features))
       sp.set("features", encodedFeatures);
     } else {
       sp.delete("features");
     }
     router.push(`${newPath}${sp.toString()}`);
-  };
+  }, [filters])
+
+  const handleFeaturesCnfrm = () => {
+    setFilters((prevForm) => ({
+      ...prevForm,
+      features: tempFeatures.features
+    }))
+  }
 
   return (
     <div className="flex justify-center py-5">
@@ -311,9 +374,10 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
             <Amenities
               toggleAlert={toggleAlert}
               handleAllTags={handleFeatures}
-              allTags={filters.features}
+              allTags={tempFeatures.features}
               handleReset={handleReset}
               filter
+              handleConfirm={handleFeaturesCnfrm}
             />
           }
           heading="Features and Amenities"
@@ -331,60 +395,71 @@ const AdvanceSearch: FC<Props> = ({ path, listing, searchParams }) => {
           border="border"
           width="300px"
         />
-        <div className="flex gap-2">
+        <div className="flex justify-between">
+          <div className="flex gap-2">
+            <DropDownwithValue
+              value={filters.purpose}
+              menu={["Buy", "Rent"]}
+              setValue={(e) => { e && setFilters((prevForm) => ({ ...prevForm, purpose: e })) }
+              }
+            />
+            <DropDownwithApply
+              value={filters.subPropertyType[0] === "All" ? `All ${filters.propertyType}` : filters.subPropertyType[0]}
+              propType
+              filters={filters}
+              setFilters={setFilters}
+            />
+            <DropDownwithApply
+              value={
+                filters.minPrice > 0 && filters.maxPrice > 0
+                  ? `PKR${formatPrice(filters.minPrice)}-${formatPrice(filters.maxPrice)}`
+                  : filters.minPrice > 0 && filters.maxPrice === 0
+                    ? `PKR ${formatPrice(filters.minPrice)} +`
+                    : filters.maxPrice > 0 && filters.minPrice === 0
+                      ? `PKR - UPTO ${formatPrice(filters.maxPrice)}`
+                      : "Price"
+              }
+              price
+              filters={filters}
+              setFilters={setFilters}
+              cross={filters.minPrice > 0 || filters.maxPrice > 0 ? true : false}
+              handleCross={() => { setFilters((prevForm) => ({ ...prevForm, minPrice: 0, maxPrice: 0 })) }}
+            />
+            <DropDownwithApply
+              value={
+                filters.measureType === "Marla" && (filters.minSize > 0 || filters.maxSize < 50) ? `${filters.minSize}-${filters.maxSize} ${filters.measureType}` :
+                  filters.measureType === "Sq.Ft" && (filters.minSize > 0 || filters.maxSize < 11250) ? `${filters.minSize}-${filters.maxSize} ${filters.measureType}` :
+                    filters.measureType === "Sq.M" && (filters.minSize > 0 || filters.maxSize < 51000) ? `${filters.minSize}-${filters.maxSize} ${filters.measureType}` :
+                      filters.measureType === "Sq.Yd" && (filters.minSize > 0 || filters.maxSize < 4000) ? `${filters.minSize}-${filters.maxSize} ${filters.measureType}` :
+                        filters.measureType === "Kanal" && (filters.minSize > 0 || filters.maxSize < 100) ? `${filters.minSize}-${filters.maxSize} ${filters.measureType}` :
+                          "Size"
+              }
+              size
+              filters={filters}
+              setFilters={setFilters}
+              cross={filters.measureType === "Marla" && filters.minSize === 0 && filters.maxSize === 50 ? false : true}
+              handleCross={() => { setFilters((prevForm) => ({ ...prevForm, measureType: "Marla", minSize: 0, maxSize: 50 })) }}
+            />
+            <DropDownwithApply value={filters.bed.length > 1 ? `Bedroom : 1 +${filters.bed.length - 1} More` : filters.bed.length === 1 && !filters.bed.includes("Any") ? `Bedroom: 1` : "Bedroom"} bed filters={filters} setFilters={setFilters} cross={filters.bed[0] === "Any" ? false : true} handleCross={() => setFilters((prevForm) => ({ ...prevForm, bed: ["Any"] }))} />
+            <DropDownwithApply value={filters.bathroom.length > 1 ? `Bathroom : 1 +${filters.bathroom.length - 1} More` : filters.bathroom.length === 1 && !filters.bathroom.includes("Any") ? `Bathroom: 1` : "Bathroom"} bath filters={filters} setFilters={setFilters} cross={filters.bathroom[0] === "Any" ? false : true} handleCross={() => setFilters((prevForm) => ({ ...prevForm, bathroom: ["Any"] }))} />
+            <button
+              onClick={() => setIsOpen(true)}
+              className="relative flex items-center text-sm border rounded-lg p-2 gap-1"
+            >
+              <CiFilter />
+              {filters.features.length > 0 && (
+                <span className="w-full h-3 bg-purple-800 rounded-full absolute right-[-5px] top-[-5px]"></span>
+              )}
+              More Filters
+            </button>
+
+          </div>
           <DropDownwithValue
-            value={filters.purpose}
-            menu={["Buy", "Rent"]}
-            setValue={(e) =>
-              {e && setFilters((prevForm) => ({ ...prevForm, purpose: e }));handleSearch}
+            value={filters.sort}
+            menu={["New Listings", "Price Low to High", "Price High to Low"]}
+            setValue={(e) => { e && setFilters((prevForm) => ({ ...prevForm, sort: e })) }
             }
           />
-          <DropDownwithApply
-          handleSearch={handleSearch}
-            value={filters.propertyType}
-            component={<MultiBtns property />}
-          />
-          <DropDownwithApply
-          handleSearch={handleSearch}
-            value="Price"
-            component={<Range title="Price" />}
-          />
-          <DropDownwithApply
-          handleSearch={handleSearch}
-            value="Size"
-            component={
-              <Range
-                area
-                title="Price"
-                unit={filters.measureType}
-                component={
-                  <DropDownwithValue
-                    menu={["Marla", "Sq.Ft", "Sq.Yd", "Sq.M", "Kanal"]}
-                    value={filters.measureType}
-                    setValue={(e) =>
-                      e &&
-                      setFilters((prevForm) => ({
-                        ...prevForm,
-                        measureType: e,
-                      }))
-                    }
-                  />
-                }
-              />
-            }
-          />
-          <DropDownwithApply handleSearch={handleSearch} value="Bed" component={<MultiBtns bed />} />
-          <DropDownwithApply handleSearch={handleSearch} value="Bath" component={<MultiBtns bath />} />
-          <button
-            onClick={() => setIsOpen(true)}
-            className="relative flex items-center text-sm border rounded-lg p-2 gap-1"
-          >
-            <CiFilter />
-            {filters.features.length > 0 && (
-              <span className="w-3 h-3 bg-purple-800 rounded-full absolute right-[-5px] top-[-5px]"></span>
-            )}
-            More Filters
-          </button>
         </div>
         {filteredProperty.length > 0 ? (
           <CardsPagination listing={filteredProperty} />

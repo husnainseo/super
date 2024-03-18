@@ -4,12 +4,19 @@ type Props = {
   property?: boolean;
   bed?: boolean;
   bath?: boolean;
+  propTab?: string;
+  setPropTab?: (tab: string) => void;
+  propBtns?: string[];
+  bedB?: string[];
+  bathB?:string[];
+  setBedB?: React.Dispatch<React.SetStateAction<string[]>>;
+  setBathB?: React.Dispatch<React.SetStateAction<string[]>>;
+  setPropBtns?: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
-const MultipleBtns: FC<Props> = ({ property, bed, bath }) => {
-  const [tab, setTab] = useState("residential");
-  const [button, setButton] = useState(["All"]);
-  const [btns, setBtns] = useState(["Any"]);
+
+const MultipleBtns: FC<Props> = ({ property, bed, bath, propTab, setPropTab, propBtns, setPropBtns,bathB, bedB,setBathB,setBedB }) => {
+
   const residentialBtns = [
     "All",
     "House",
@@ -48,8 +55,8 @@ const MultipleBtns: FC<Props> = ({ property, bed, bath }) => {
     value: string
   ) => {
     event.stopPropagation();
-    setTab(value);
-    setButton(["All"]);
+    setPropTab && setPropTab(value);
+    setPropBtns && setPropBtns(["All"])
   };
 
   const handleSubBtns = (
@@ -58,18 +65,18 @@ const MultipleBtns: FC<Props> = ({ property, bed, bath }) => {
   ) => {
     event.stopPropagation();
     if (value === "All") {
-      setButton([value]);
+      setPropBtns && setPropBtns([value])
     } else {
-      setButton((prevButtons) => {
+      setPropBtns && setPropBtns((prevButtons: string[]) => {
         let updatedButtons;
         if (prevButtons.includes("All") && value !== "All") {
-          updatedButtons = prevButtons.filter((btn) => btn !== "All");
+          updatedButtons = prevButtons.filter((btn: string) => btn !== "All");
         } else {
           updatedButtons = [...prevButtons];
         }
 
         if (updatedButtons.includes(value)) {
-          updatedButtons = updatedButtons.filter((btn) => btn !== value);
+          updatedButtons = updatedButtons.filter((btn: string) => btn !== value);
         } else {
           updatedButtons.push(value);
         }
@@ -79,33 +86,62 @@ const MultipleBtns: FC<Props> = ({ property, bed, bath }) => {
     }
   };
 
-  const handleOtherBtns = (
+  const handleBedBtns = (
     event: React.MouseEvent<HTMLButtonElement>,
     value: string
   ) => {
     event.stopPropagation();
     if (value === "Any") {
-      setBtns([value]);
+      setBedB && setBedB([value]);
     } else {
-      setBtns((prevButtons) => {
+      setBedB && setBedB((prevButtons: string[]) => {
         let updatedButtons;
         if (prevButtons.includes("Any") && value !== "Any") {
-          updatedButtons = prevButtons.filter((btn) => btn !== "Any");
+          updatedButtons = prevButtons.filter((btn: string) => btn !== "Any");
         } else {
           updatedButtons = [...prevButtons];
         }
-  
+
         if (updatedButtons.includes(value)) {
-          updatedButtons = updatedButtons.filter((btn) => btn !== value);
+          updatedButtons = updatedButtons.filter((btn: string) => btn !== value);
         } else {
           updatedButtons.push(value);
         }
-  
+
         return updatedButtons;
       });
     }
   };
-  
+
+  const handleBathBtns = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    value: string
+  ) => {
+    event.stopPropagation();
+    if (value === "Any") {
+      setBathB && setBathB([value]);
+    } else {
+      setBathB && setBathB((prevButtons: string[]) => {
+        let updatedButtons;
+        if (prevButtons.includes("Any") && value !== "Any") {
+          updatedButtons = prevButtons.filter((btn: string) => btn !== "Any");
+        } else {
+          updatedButtons = [...prevButtons];
+        }
+
+        if (updatedButtons.includes(value)) {
+          updatedButtons = updatedButtons.filter((btn: string) => btn !== value);
+        } else {
+          updatedButtons.push(value);
+        }
+
+        return updatedButtons;
+      });
+    }
+  };
+
+
+
 
   return (
     <>
@@ -113,62 +149,56 @@ const MultipleBtns: FC<Props> = ({ property, bed, bath }) => {
         <div>
           <div className="flex">
             <button
-              className={`w-28 py-2 ${
-                tab === "residential" && "border-b-2 border-[#1f1f29]"
-              }`}
+              className={`w-28 py-2 ${propTab === "residential" && "border-b-2 border-[#1f1f29]"
+                }`}
               onClick={(e) => handlePropType(e, "residential")}
             >
               Residential
             </button>
             <button
-              className={`w-28 py-2 ${
-                tab === "plot" && "border-b-2 border-[#1f1f29]"
-              }`}
+              className={`w-28 py-2 ${propTab === "plot" && "border-b-2 border-[#1f1f29]"
+                }`}
               onClick={(e) => handlePropType(e, "plot")}
             >
               Plot
             </button>
             <button
-              className={`w-28 py-2 ${
-                tab === "commercial" && "border-b-2 border-[#1f1f29]"
-              }`}
+              className={`w-28 py-2 ${propTab === "commercial" && "border-b-2 border-[#1f1f29]"
+                }`}
               onClick={(e) => handlePropType(e, "commercial")}
             >
               Commercial
             </button>
           </div>
           <div className="flex flex-wrap gap-2 py-2">
-            {tab === "residential" &&
+            {propTab === "residential" &&
               residentialBtns.map((e, i) => (
                 <button
                   onClick={(event) => handleSubBtns(event, e)}
-                  className={`capitilize px-4 py-2 border rounded-md ${
-                    button.includes(e) && "bg-[#1f1f29] text-white border-none"
-                  }`}
+                  className={`capitilize px-4 py-2 border rounded-md ${propBtns?.includes(e) && "bg-[#1f1f29] text-white border-none"
+                    }`}
                   key={i}
                 >
                   {e}
                 </button>
               ))}
-            {tab === "plot" &&
+            {propTab === "plot" &&
               plotBtns.map((e, i) => (
                 <button
                   onClick={(event) => handleSubBtns(event, e)}
                   key={i}
-                  className={`capitilize px-4 py-2 border rounded-md ${
-                    button.includes(e) && "bg-[#1f1f29] text-white border-none"
-                  }`}
+                  className={`capitilize px-4 py-2 border rounded-md ${propBtns?.includes(e) && "bg-[#1f1f29] text-white border-none"
+                    }`}
                 >
                   {e}
                 </button>
               ))}
-            {tab === "commercial" &&
+            {propTab === "commercial" &&
               commercialBtns.map((e, i) => (
                 <button
                   onClick={(event) => handleSubBtns(event, e)}
-                  className={`capitilize px-4 py-2 border rounded-md ${
-                    button.includes(e) && "bg-[#1f1f29] text-white border-none"
-                  }`}
+                  className={`capitilize px-4 py-2 border rounded-md ${propBtns?.includes(e)  && "bg-[#1f1f29] text-white border-none"
+                    }`}
                   key={i}
                 >
                   {e}
@@ -184,11 +214,10 @@ const MultipleBtns: FC<Props> = ({ property, bed, bath }) => {
             <div className="flex flex-wrap gap-2 py-2">
               {bedBtns.map((e, i) => (
                 <button
-                  className={`capitilize px-4 py-2 border rounded-md ${
-                    btns.includes(e) && "bg-[#1f1f29] text-white border-none"
-                  }`}
+                  className={`capitilize px-4 py-2 border rounded-md ${bedB?.includes(e) && "bg-[#1f1f29] text-white border-none"
+                    }`}
                   key={i}
-                  onClick={(event) => handleOtherBtns(event, e)}
+                  onClick={(event) => handleBedBtns(event, e)}
                 >
                   {e}
                 </button>
@@ -200,15 +229,14 @@ const MultipleBtns: FC<Props> = ({ property, bed, bath }) => {
       {bath && (
         <>
           <div className="w-96">
-            <p>Bathroom</p>
+            <p>Bedroom</p>
             <div className="flex flex-wrap gap-2 py-2">
               {bathBtns.map((e, i) => (
                 <button
-                  className={`capitilize px-4 py-2 border rounded-md ${
-                    btns.includes(e) && "bg-[#1f1f29] text-white border-none"
-                  }`}
+                  className={`capitilize px-4 py-2 border rounded-md ${bathB?.includes(e) && "bg-[#1f1f29] text-white border-none"
+                    }`}
                   key={i}
-                  onClick={(event) => handleOtherBtns(event, e)}
+                  onClick={(event) => handleBathBtns(event, e)}
                 >
                   {e}
                 </button>
