@@ -16,11 +16,9 @@ type Props = {
   activeAlert: () => void;
   user: IUser;
   handleLogout: () => void;
-  active: boolean;
-  bgChange?: boolean;
 };
 
-const Hamburger: FC<Props> = ({ activeAlert, user, handleLogout, active ,bgChange}) => {
+const Hamburger: FC<Props> = ({ activeAlert, user, handleLogout}) => {
   const [showMenu, setShowMenu] = useState(false);
 
   const logout = () => {
@@ -30,9 +28,8 @@ const Hamburger: FC<Props> = ({ activeAlert, user, handleLogout, active ,bgChang
     <div className="absolute left-5">
       <div className="inline-block text-left ">
         <RiMenu2Fill
-          className={`[1060px]:hidden ri-menu-2-fill  ${
-            active || bgChange? "text-purple-800" : "text-white"
-          } text-[25px] cursor-pointer`}
+          className={`[1060px]:hidden ri-menu-2-fill text-purple-800
+          text-[25px] cursor-pointer`}
           onClick={() => setShowMenu(!showMenu)}
         />
         {showMenu ? (

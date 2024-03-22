@@ -4,6 +4,7 @@ import { IListing } from "@/types/types";
 import Link from "next/link";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { styles } from "../../Styles/style";
+import { MdOutlineArrowForwardIos } from "react-icons/md";
 
 type Props = {
   listings: IListing[];
@@ -100,7 +101,7 @@ const CardSlider: FC<Props> = ({ listings, title, query }) => {
                 <Link href={`/property/${property._id}`} key={index}>
                   <div key={index} className="mr-3 xl:mr-0">
                     <PropertyCard
-                    width
+                      width
                       price={property.price}
                       location={property.location}
                       areaSize={property.area.size}
@@ -117,6 +118,7 @@ const CardSlider: FC<Props> = ({ listings, title, query }) => {
                 </Link>
               ))}
             </div>
+            {query && listing.length > 4 && (<Link href={`https://3000-husnainseo-super-7kshv9vjans.ws-us110.gitpod.io/${listing[0].purpose}/${listing[0].city}-${listing[0].propertyType}`}><button className=" place-items-start flex font-medium items-center ml-10 gap-5 text-sm">VIEW ALL <MdOutlineArrowForwardIos /></button></Link>)}
           </div>
         </div>
       )}

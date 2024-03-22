@@ -23,6 +23,15 @@ import {
   subTypePlot,
   subTypeResidential,
   propertyType,
+  lahoreSocieties,
+  bwpSocieties,
+  faisalabadSocieties,
+  karachiSocieties,
+  multanSocieties,
+  islamabadSocieties,
+  rawalpindiSocieties,
+  quettaSocieties,
+  peshawarSocieties,
 } from "@/data/propertyFormData";
 
 const { useCreateListingMutation, useUpdateListingMutation } = await import(
@@ -78,7 +87,6 @@ const Property: FC<Props> = ({
   const [loadUser, setLoadUser] = useState(false);
   const { refetch } = useLoadUserQuery(undefined, { skip: !loadUser });
   const [editMode, setEditMode] = useState(formEditMode);
-
   useEffect(() => {
     if (loadUser) {
       refetch();
@@ -89,7 +97,7 @@ const Property: FC<Props> = ({
 
   const handleImages = async (e: any) => {
     const files: File[] = Array.from(e.target.files);
-    console.log("working");
+
 
     files.forEach((file) => {
       const fileReader = new FileReader();
@@ -139,6 +147,7 @@ const Property: FC<Props> = ({
       console.log(form);
     }
   };
+
 
   return (
     <>
@@ -205,6 +214,7 @@ const Property: FC<Props> = ({
         </div>
         <label>City</label>
         <DropDown
+          del={() => setForm({ ...form, city: "" })}
           options={cityOptions}
           placeholder="Select City"
           {...(form.city !== "" && {
@@ -213,20 +223,29 @@ const Property: FC<Props> = ({
             defaultValue: form.city.toString(),
           })}
           clearable
-          onValueChange={(e) => e && setForm({ ...form, city: e })}
+          onValueChange={(e) => e && setForm({ ...form, city: e ,location:""})}
+
           border="border"
         />
 
-        <label>Location</label>
-        <div className="flex border mx-w-sm rounded-xl justify-between bg-white">
-          <input
-            type="text"
-            className="w-[50%] flex-1 rounded-xl p-3 outline-none bg-transparent"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-            placeholder="Location"
-          />
-        </div>
+        {form.city !== "" && (
+          <>
+            <label>Location</label>
+            <DropDown
+              del={() => setForm({ ...form, location: "" })}
+              options={form.city === "bahawalpur" ? bwpSocieties : form.city === "lahore" ? lahoreSocieties : form.city === "karachi" ? karachiSocieties : form.city === "multan" ? multanSocieties : form.city === "islamabad" ? islamabadSocieties : form.city === "rawalpindi" ? rawalpindiSocieties : form.city === "faisalabad" ? faisalabadSocieties : form.city === "peshawar" ? peshawarSocieties : form.city === "quetta" ? quettaSocieties : [{ value: "selectcity", label: "Select City" }]}
+              placeholder="Select Location"
+              {...(form.location !== "" && {
+                defaultLabel:
+                  form.location.charAt(0).toUpperCase() + form.location.slice(1).toString(),
+                defaultValue: form.location.toString(),
+              })}
+              clearable
+              onValueChange={(e) => e && setForm({ ...form, location: e })}
+              border="border"
+            />
+          </>
+        )}
         <label>Area</label>
         <div className="flex border bg-white mx-w-sm rounded-xl justify-between">
           <input

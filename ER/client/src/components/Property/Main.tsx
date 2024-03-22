@@ -40,7 +40,7 @@ const Main: FC<Props> = ({ id }) => {
 
   return (
     <div>
-      <StickyNavBar bgChange={true} />
+      <StickyNavBar />
       {show && (
         <div className="first hidden xs:block fixed h-20 top-16 bg-white shadow-md w-full mx-auto z-10 py-4">
           <Title listing={listing.listing} />

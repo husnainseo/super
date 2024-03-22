@@ -209,7 +209,7 @@ const MultipleBtns: FC<Props> = ({ property, bed, bath, propTab, setPropTab, pro
       )}
       {bed && (
         <>
-          <div className="w-96">
+          <div className="w-auto sm:w-96">
             <p>Bedroom</p>
             <div className="flex flex-wrap gap-2 py-2">
               {bedBtns.map((e, i) => (
@@ -228,7 +228,7 @@ const MultipleBtns: FC<Props> = ({ property, bed, bath, propTab, setPropTab, pro
       )}
       {bath && (
         <>
-          <div className="w-96">
+          <div className="w-auto sm:w-96">
             <p>Bedroom</p>
             <div className="flex flex-wrap gap-2 py-2">
               {bathBtns.map((e, i) => (

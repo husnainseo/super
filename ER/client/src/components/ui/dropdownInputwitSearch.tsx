@@ -1,3 +1,4 @@
+import { clear } from "console";
 import React, { FC } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
@@ -15,8 +16,9 @@ type Props = {
   width?: string;
   clearable?: boolean;
   onValueChange: (value: string) => void;
-  border?:string
-};
+  border?:string;
+  del?:()=>void;
+  };
 
 const Dropdown: FC<Props> = ({
   options,
@@ -27,6 +29,7 @@ const Dropdown: FC<Props> = ({
   clearable,
   onValueChange,
   border,
+  del
 }) => {
   const [value, setValue] = React.useState(defaultValue || "");
   const [label, setLabel] = React.useState(defaultLabel || "");
@@ -100,6 +103,7 @@ const Dropdown: FC<Props> = ({
               setValue("");
               setSearchTerm("");
               setLabel("");
+               del && del();
             }}
           />
         )}

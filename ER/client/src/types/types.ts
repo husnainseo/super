@@ -105,7 +105,23 @@ export interface IFilter {
   bed: string[];
   bathroom: string[];
   features: string[];
-  sort:string
+  sort:string;
+  location:string[]
 }
 
+export interface IParams  {
+  city: string;
+  purpose: "Buy" | "Rent";
+  propertyType: string;
+  subPropertyType?: string[];
+  location?: string[] | null;
+  minPrice?: string | null;
+  maxPrice?: string | null;
+  measureType?: string | null;
+  minSize?: string | null;
+  maxSize?: string | null;
+  bed?: string[] | null;
+  bath?: string[] | null;
+  features?: string[] | null;
+};
 

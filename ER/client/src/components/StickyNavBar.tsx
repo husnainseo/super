@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import LoggedInIcon from "./Signup-login/LoggedInIcon";
 import Popup from "../components/Signup-login/Main";
 import Image from "next/image";
-import SearchBar from "./SearchBar";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 import { signOut } from "next-auth/react";
@@ -16,10 +15,9 @@ import {
 } from "../redux/features/auth/authAPI";
 
 type Props = {
-  bgChange?: boolean;
 };
 
-const StickyNavbar: FC<Props> = ({ bgChange }) => {
+const StickyNavbar: FC<Props> = () => {
   const [active, setActive] = useState(false);
   const { user } = useSelector((state: any) => state.auth);
   const [isOpen, setIsOpen] = React.useState(false);
@@ -27,18 +25,10 @@ const StickyNavbar: FC<Props> = ({ bgChange }) => {
   const { data } = useSession();
   const [isMobile, setIsMobile] = useState(false);
   const [logout, setLogout] = useState(false);
-  const {} = useLogoutQuery(undefined, {
+  const { } = useLogoutQuery(undefined, {
     skip: !logout ? true : false,
   });
-  if (typeof window !== "undefined") {
-    window.addEventListener("scroll", () => {
-      if (window.scrollY > 200 && !bgChange) {
-        setActive(true);
-      } else {
-        setActive(false);
-      }
-    });
-  }
+  
   const toggleAlert = () => {
     setIsOpen(!isOpen);
   };
@@ -73,20 +63,47 @@ const StickyNavbar: FC<Props> = ({ bgChange }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [isDropdownVisible2, setIsDropdownVisible2] = useState(false);
+  const [isDropdownVisible3, setIsDropdownVisible3] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsDropdownVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDropdownVisible(false);
+  };
+
+  function generateDropdown(items: string[]) {
+    return (
+      <div className="dropdown origin-top-right absolute mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+        <div className="py-2 p-2" role="menu" aria-orientation="vertical" aria-labelledby="dropdown-button">
+          {items.map((item, index) => (
+            <a
+            href=""
+              key={index}
+              className="block px-4 py-2 mb-1 text-xs text-gray-700 rounded-md bg-white hover:bg-gray-100"
+              role="menuitem"
+            >
+              {item}
+            </a>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="sticky  top-0 z-40">
       {isOpen ? <Popup closeAlert={toggleAlert}></Popup> : null}
       <div
-        className={`${
-          active || bgChange
-            ? "bg-[#f9f4f4] transition-all shadow-lg"
-            : " text-white "
-        } w-full  flex items-center px-[9vw] h-16 justify-center `}
+        className="bg-[#f9f4f4] w-full  flex items-center px-[9vw] h-16 justify-center"
       >
         <Link href={"/"}>
           <h1 className="text-2xl font-medium flex items-center gap-2">
             <Image
-              src={`${active || bgChange ? "/er.svg" : "/er-white.svg"}`}
+              src={"/er.svg"}
               alt="logo"
               width={30}
               height={30}
@@ -100,40 +117,24 @@ const StickyNavbar: FC<Props> = ({ bgChange }) => {
               activeAlert={toggleAlert}
               user={user}
               handleLogout={handleLogout}
-              active={active}
-              bgChange={bgChange}
             />
           </div>
         ) : (
           <>
-            {active ? (
-              <div className="flex-1">
-                <SearchBar active={active} bgChange={bgChange} />
-              </div>
-            ) : (
-              bgChange && (
-                <div className="flex-1">
-                  <SearchBar active={active} bgChange={bgChange} />
-                </div>
-              )
-            )}
-            {!active && !bgChange && (
-              <ul className="flex gap-5  items-center text-white/80 font-Poppins justify-center flex-1 px-8 text-[16px] font-medium">
-                <li className="hover:text-white drop-shadow cursor-pointer py-2 hover:border-b-2 border-purple-800">
-                  For Buyers
-                </li>
-                <li className="hover:text-white drop-shadow cursor-pointer py-2 hover:border-b-2 border-purple-800">
-                  For Tenants
-                </li>
-                <li className="hover:text-white drop-shadow cursor-pointer py-2 hover:border-b-2 border-purple-800">
-                  For Owners
-                </li>
-                <li className="hover:text-white drop-shadow cursor-pointer py-2 hover:border-b-2 border-purple-800">
-                  For Agents
-                </li>
-              </ul>
-            )}
-
+            <ul className={`flex gap-5  items-center text-[#1f2929] font-Poppins justify-center flex-1 px-8 text-[16px] font-medium`}>
+              <li className={`relative  cursor-pointer py-2`} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                For Buyers
+                {isDropdownVisible && generateDropdown(["Buy a residential", "Buy a commercial", "Buy a plot"])}
+              </li>
+              <li className={`  cursor-pointer py-2`} onMouseEnter={() => setIsDropdownVisible2(true)} onMouseLeave={() => setIsDropdownVisible2(false)}>
+                For Tenants
+                {isDropdownVisible2 && generateDropdown(["Residential property on rent", "Commercial property on rent"])}
+              </li>
+              <li className={`  cursor-pointer py-2 `} onMouseEnter={() => setIsDropdownVisible3(true)} onMouseLeave={() => setIsDropdownVisible3(false)}>
+                For Owners
+                {isDropdownVisible3 && generateDropdown(["Sell a property", "Rentout a property"])}
+              </li>
+            </ul>
             <div className="flex gap-5 items-center mr-[2vw]">
               {user && !isMobile ? (
                 <LoggedInIcon user={user} logout={handleLogout} />

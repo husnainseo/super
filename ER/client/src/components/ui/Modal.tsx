@@ -29,7 +29,7 @@ const Alert: FC<AlertProps> = ({ component, closeAlert, heading }) => {
         }
       }}
     >
-      <div className={`${styles.popupContent} ${isMobile && "w-full h-full"}`}>
+      <div className={`${styles.popupContent} ${!isMobile && "rounded-3xl"} ${isMobile && "w-screen h-full"}`}>
         <div className={`flex items-center justify-between ${heading && "border-b border-zinc-400 py-2"}`}>
           <p className="text-xl">{heading}</p>
           <RxCross2
@@ -37,7 +37,7 @@ const Alert: FC<AlertProps> = ({ component, closeAlert, heading }) => {
             onClick={closeAlert}
           />
         </div>
-        <div>{component}</div>
+        <div className="overflow-auto">{component}</div>
       </div>
     </div>
   );

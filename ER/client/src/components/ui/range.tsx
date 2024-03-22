@@ -30,8 +30,8 @@ type Props = {
   unit?: string;
   value: number[];
   setValue: React.Dispatch<React.SetStateAction<number[]>>
-  rangeIdx:number[];
-  setRangeIdx : React.Dispatch<React.SetStateAction<number[]>>
+  rangeIdx?:number[];
+  setRangeIdx ?: React.Dispatch<React.SetStateAction<number[]>>
   max?:number;
   setMax?:(e:number)=>void;
 };
@@ -126,7 +126,7 @@ const PricevalueSlider: React.FC<Props> = ({
         updatedValueReverse = 0;
       }
       setValue([updatedValue, updatedValueReverse]);
-      setRangeIdx([newValue[0],newValue[1]])
+      setRangeIdx && setRangeIdx([newValue[0],newValue[1]])
     }
     if (Array.isArray(newValue) && area) {
       setValue([newValue[0], newValue[1]]);
@@ -136,7 +136,7 @@ const PricevalueSlider: React.FC<Props> = ({
     
 
   return (
-    <div className="px-3 py-2 w-80 flex flex-col gap-2">
+    <div className="px-3 py-2 w-auto sm:w-80 flex flex-col gap-2">
       <div className="flex justify-between font-medium">
         <p>{title}</p>
         {area && <div>{component}</div>}
@@ -207,7 +207,7 @@ const PricevalueSlider: React.FC<Props> = ({
             onChange={handleSliderChange}
           />
         )}
-        {!area && (
+        {!area && rangeIdx && (
           <EmarkSlider
             defaultValue={[rangeIdx[0], rangeIdx[1]]}
             min={0}

@@ -29,13 +29,13 @@ const LoggedInIcon = ({ user ,logout}: Props) => {
 
   return (
     <div>
-      <div className="relative inline-block text-left bg-white p-1 rounded">
+      <div className="relative inline-block text-left bg-white p-1 rounded-full">
         <Image
           src={user.profile.image.url}
           alt="avatar"
           width={32}
           height={32}
-          className="rounded cursor-pointer object-cover w-8 h-8"
+          className="rounded-full cursor-pointer object-cover w-8 h-8"
           onClick={() => setShowMenu(!showMenu)}
         />
         {showMenu && (

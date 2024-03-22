@@ -8,7 +8,7 @@ type Props = {
 
 const CardsPagination: FC<Props> = ({ listing }) => {
     return (
-        <div className='flex flex-wrap gap-6 justify-center'>
+        <div className='flex flex-wrap gap-6 justify-center sm:justify-normal'>
             {listing.slice(0, 30).map((property, index) => (
                 <Link href={`/property/${property._id}`} key={index}>
                     <PropertyCard
